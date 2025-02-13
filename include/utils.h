@@ -1,6 +1,9 @@
 #ifndef __utils_h__
 #define __utils_h__
 
+#include <tuple>
+#include <type_traits>
+
 namespace utils {
 
 template <int N, class... types>

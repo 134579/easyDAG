@@ -1,12 +1,9 @@
 #ifndef __step_h__
 #define __step_h__
 
-#include <functional>
 #include <iostream>
 #include <string>
 #include <tuple>
-#include <type_traits>
-#include <utility>
 
 // forward declaration
 template <typename lambda, typename... types> class Step;

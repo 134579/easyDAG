@@ -1,10 +1,9 @@
 #ifndef __task_h__
 #define __task_h__
 
+#include <future>
 #include <step.hpp>
 
-#include <future>
-#include <utility>
 
 // class specialization with async tasks
 template <typename lambda, typename... types>
