@@ -3,29 +3,27 @@
 #include <timeit.hpp>
 
 #ifndef NREP
-  #define NREP 10
+#define NREP 10
 #endif
 
 #ifndef NUM
-  #define NUM 10
+#define NUM 10
 #endif
 
+int main() {
 
-int main ()
-{
+  std ::size_t num_threads = 4;
+  constexpr std ::size_t size = 100;
 
-  std :: size_t num_threads = 4;
-  constexpr std :: size_t size = 100;
+  timeit<NREP, NUM> timer;
 
-  timeit < NREP, NUM > timer;
+  double time_omp =
+      timer.evaluate([&]() { dot_product_omp(size, num_threads); });
 
-  double time_omp = timer.evaluate([&](){dot_product_omp(size, num_threads);});
+  double time_easy = timer.evaluate([&]() { dot_product_task<size>(); });
 
-
-  double time_easy = timer.evaluate([&](){dot_product_task < size >();});
-
-  std :: cout << "OMP: " << time_omp << std :: endl;
-  std :: cout << "easyDAG: " << time_easy << std :: endl;
+  std ::cout << "OMP: " << time_omp << std ::endl;
+  std ::cout << "easyDAG: " << time_easy << std ::endl;
 
   return 0;
 }

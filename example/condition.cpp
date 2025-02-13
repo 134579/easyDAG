@@ -18,29 +18,24 @@
 #include <cassert>
 #include <iostream>
 
-
-int main ()
-{
+int main() {
   int cnt = 0;
-  auto counter = InputVariable (cnt);
+  auto counter = InputVariable(cnt);
 
-  auto increment = [](int counter)
-                   {
-                     std :: cout << "I'm the incrementer" << std :: endl;
-                     return counter + 1;
-                   };
+  auto increment = [](int counter) {
+    std ::cout << "I'm the incrementer" << std ::endl;
+    return counter + 1;
+  };
 
-  auto condition = [](int counter)
-                   {
-                     if ( counter == 5 )
-                     {
-                       std :: cout << "condition reached" << std :: endl;
-                       return 1;
-                     }
+  auto condition = [](int counter) {
+    if (counter == 5) {
+      std ::cout << "condition reached" << std ::endl;
+      return 1;
+    }
 
-                     std :: cout << "loop again (counter = " << counter << ")" << std :: endl;
-                     return 0;
-                   };
+    std ::cout << "loop again (counter = " << counter << ")" << std ::endl;
+    return 0;
+  };
 
   Task increment_step(increment, counter);
   Task check_step(condition, counter);
@@ -48,8 +43,7 @@ int main ()
   // evaluate the check step
   check_step.eval();
 
-  while ( ! check_step () )
-  {
+  while (!check_step()) {
     // evaluate the incremental step
     increment_step.eval();
     cnt = increment_step();

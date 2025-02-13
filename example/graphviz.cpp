@@ -19,41 +19,35 @@
 
 #include <easyDAG.hpp>
 
-#include <numeric>
+#include <algorithm>
 #include <cassert>
 #include <iostream>
-#include <algorithm>
+#include <numeric>
 
-
-int main ()
-{
+int main() {
   const int N = 10;
-  const std :: string pipeline_name = "pipeline";
+  const std ::string pipeline_name = "pipeline";
 
-  auto init = [](const int & N) -> std :: vector < float >
-              {
-                std :: vector < float > x(N);
-                return x;
-              };
+  auto init = [](const int &N) -> std ::vector<float> {
+    std ::vector<float> x(N);
+    return x;
+  };
 
-  auto fill = [](std :: vector < float > x) -> std :: vector < float >
-              {
-                std :: fill(x.begin(), x.end(), 1.f);
-                return x;
-              };
+  auto fill = [](std ::vector<float> x) -> std ::vector<float> {
+    std ::fill(x.begin(), x.end(), 1.f);
+    return x;
+  };
 
-  auto concat = [](std :: vector < float > x, std :: vector < float > y)
-                {
-                  std :: vector < float > res(x.size() + y.size());
-                  std :: copy_n(x.begin(), x.size(), res.begin());
-                  std :: copy_n(y.begin(), y.size(), res.begin() + x.size());
-                  return res;
-                };
+  auto concat = [](std ::vector<float> x, std ::vector<float> y) {
+    std ::vector<float> res(x.size() + y.size());
+    std ::copy_n(x.begin(), x.size(), res.begin());
+    std ::copy_n(y.begin(), y.size(), res.begin() + x.size());
+    return res;
+  };
 
-  auto reduce = [](std :: vector < float > res)
-                  {
-                    return std :: accumulate(res.begin(), res.end(), 0.f);
-                  };
+  auto reduce = [](std ::vector<float> res) {
+    return std ::accumulate(res.begin(), res.end(), 0.f);
+  };
 
   auto size = InputVariable(N);
   size.set_name(size);
@@ -76,10 +70,10 @@ int main ()
   Task reduction(reduce, concatenate);
   reduction.set_name(reduction);
 
-  reduction.graphviz(std :: cout, pipeline_name);
+  reduction.graphviz(std ::cout, pipeline_name);
   reduction.eval();
 
-  assert ( reduction() == N * 2 );
+  assert(reduction() == N * 2);
 
   return 0;
 }

@@ -11,39 +11,33 @@
 
 #include <easyDAG.hpp>
 
-#include <numeric>
+#include <algorithm>
 #include <cassert>
 #include <iostream>
-#include <algorithm>
+#include <numeric>
 
-
-int main ()
-{
+int main() {
   const int N = 10;
 
-  auto init = [&](const int & N)
-              {
-                std :: cout << "I'm the initializer" << std :: endl;
-                float * x = new float[N];
-                return x;
-              };
-  auto fill = [&](float * x)
-              {
-                std :: cout << "I'm the filler" << std :: endl;
-                std :: fill_n(x, N, 1.f);
-                return x;
-              };
-  auto sum  = [&](float * x)
-              {
-                std :: cout << "I'm the sum reduction" << std :: endl;
-                return std :: accumulate(x, x + N, 0.f);
-              };
+  auto init = [&](const int &N) {
+    std ::cout << "I'm the initializer" << std ::endl;
+    float *x = new float[N];
+    return x;
+  };
+  auto fill = [&](float *x) {
+    std ::cout << "I'm the filler" << std ::endl;
+    std ::fill_n(x, N, 1.f);
+    return x;
+  };
+  auto sum = [&](float *x) {
+    std ::cout << "I'm the sum reduction" << std ::endl;
+    return std ::accumulate(x, x + N, 0.f);
+  };
 
-  auto prod = [&](float * x)
-              {
-                std :: cout << "I'm the prod reduction" << std :: endl;
-                return std :: accumulate(x, x + N, 1.f, std :: multiplies < float >());
-              };
+  auto prod = [&](float *x) {
+    std ::cout << "I'm the prod reduction" << std ::endl;
+    return std ::accumulate(x, x + N, 1.f, std ::multiplies<float>());
+  };
 
   auto a = InputVariable(N);
 
@@ -57,17 +51,18 @@ int main ()
 
   auto result = sum_step();
 
-  assert ( result == N );
+  assert(result == N);
 
-  std :: cout << "Summation result: " << result << std :: endl;
+  std ::cout << "Summation result: " << result << std ::endl;
 
-  // Re-calling the same evaluation the lambdas are not recomputed (aka no cout)!
+  // Re-calling the same evaluation the lambdas are not recomputed (aka no
+  // cout)!
 
-  std :: cout << "Re-called sum value: " << sum_step () << std :: endl;
+  std ::cout << "Re-called sum value: " << sum_step() << std ::endl;
 
   // But also if we use common steps they do not need to be re-computed!
 
-  std :: cout << "Product result: " << prod_step() << std :: endl;
+  std ::cout << "Product result: " << prod_step() << std ::endl;
 
   return 0;
 }

@@ -15,69 +15,87 @@
 //
 /***************************************************/
 
-#include <set>
+#include <algorithm>
 #include <cmath>
-#include <vector>
+#include <iostream>
 #include <memory>
 #include <numeric>
-#include <iostream>
-#include <algorithm>
+#include <set>
+#include <vector>
 
 #include <easyDAG.hpp>
 
-int main ()
-{
+int main() {
 
   const int Nlabels = 12;
   int Nclass;
 
-  int * y_true = new int[Nlabels];
-  y_true[0] = 2;  y_true[1] = 0;  y_true[2] = 2;  y_true[3] = 2;  y_true[4] = 0;   y_true[5] = 1;
-  y_true[6] = 1;  y_true[7] = 2;  y_true[8] = 2;  y_true[9] = 0;  y_true[10] = 1;  y_true[11] = 2;
+  int *y_true = new int[Nlabels];
+  y_true[0] = 2;
+  y_true[1] = 0;
+  y_true[2] = 2;
+  y_true[3] = 2;
+  y_true[4] = 0;
+  y_true[5] = 1;
+  y_true[6] = 1;
+  y_true[7] = 2;
+  y_true[8] = 2;
+  y_true[9] = 0;
+  y_true[10] = 1;
+  y_true[11] = 2;
 
-  int * y_pred = new int[Nlabels];
-  y_pred[0] = 0;  y_pred[1] = 0;  y_pred[2] = 2;  y_pred[3] = 1;  y_pred[4] = 0;   y_pred[5] = 2;
-  y_pred[6] = 1;  y_pred[7] = 0;  y_pred[8] = 2;  y_pred[9] = 0;  y_pred[10] = 2;  y_pred[11] = 2;
+  int *y_pred = new int[Nlabels];
+  y_pred[0] = 0;
+  y_pred[1] = 0;
+  y_pred[2] = 2;
+  y_pred[3] = 1;
+  y_pred[4] = 0;
+  y_pred[5] = 2;
+  y_pred[6] = 1;
+  y_pred[7] = 0;
+  y_pred[8] = 2;
+  y_pred[9] = 0;
+  y_pred[10] = 2;
+  y_pred[11] = 2;
 
+  auto get_classes = [&](const int *lbl_true, const int *lbl_pred,
+                         const int &n_true, const int &n_pred) {
+    std ::set<int> u1(lbl_true, lbl_true + n_true);
+    std ::set<int> u2(lbl_pred, lbl_pred + n_pred);
 
-  auto get_classes = [&] (const int * lbl_true, const int * lbl_pred, const int & n_true, const int & n_pred)
-  {
-    std :: set < int > u1 (lbl_true, lbl_true + n_true);
-    std :: set < int > u2 (lbl_pred, lbl_pred + n_pred);
-
-    std :: vector < float > classes (u1.size() + u2.size());
-    auto it = std :: set_union(u1.begin(), u1.end(), u2.begin(), u2.end(), classes.begin());
+    std ::vector<float> classes(u1.size() + u2.size());
+    auto it = std ::set_union(u1.begin(), u1.end(), u2.begin(), u2.end(),
+                              classes.begin());
     classes.resize(it - classes.begin());
 
-    Nclass = static_cast < int >(classes.size());
+    Nclass = static_cast<int>(classes.size());
 
-    float * res = new float[classes.size()];
-    std :: move(classes.begin(), classes.end(), res);
+    float *res = new float[classes.size()];
+    std ::move(classes.begin(), classes.end(), res);
 
     return res;
   };
 
-  auto get_confusion_matrix = [] (const int * lbl_true, const int * lbl_pred, const int & n_lbl, const float * classes, const int & Nclass)
-  {
-    float * confusion_matrix = new float[Nclass * Nclass];
+  auto get_confusion_matrix = [](const int *lbl_true, const int *lbl_pred,
+                                 const int &n_lbl, const float *classes,
+                                 const int &Nclass) {
+    float *confusion_matrix = new float[Nclass * Nclass];
 
-    std :: fill_n(confusion_matrix, Nclass * Nclass, 0.f);
+    std ::fill_n(confusion_matrix, Nclass * Nclass, 0.f);
 
     auto start = classes;
-    auto end   = classes + Nclass;
+    auto end = classes + Nclass;
 
-    for (int i = 0; i < n_lbl; ++i)
-    {
-      const int i1 = std :: distance(start, std :: find(start, end, lbl_true[i]));
-      const int i2 = std :: distance(start, std :: find(start, end, lbl_pred[i]));
-      ++ confusion_matrix[i1 * Nclass + i2];
+    for (int i = 0; i < n_lbl; ++i) {
+      const int i1 = std ::distance(start, std ::find(start, end, lbl_true[i]));
+      const int i2 = std ::distance(start, std ::find(start, end, lbl_pred[i]));
+      ++confusion_matrix[i1 * Nclass + i2];
     }
     return confusion_matrix;
   };
 
-  auto get_TP = [] (const float * confusion_matrix, const int & Nclass)
-  {
-    float * TP = new float[Nclass];
+  auto get_TP = [](const float *confusion_matrix, const int &Nclass) {
+    float *TP = new float[Nclass];
 
     for (int i = 0; i < Nclass; ++i)
       TP[i] = confusion_matrix[i * Nclass + i];
@@ -85,24 +103,23 @@ int main ()
     return TP;
   };
 
-  auto get_FN = [] (const float * confusion_matrix, const int & Nclass)
-  {
-    float * FN = new float[Nclass];
+  auto get_FN = [](const float *confusion_matrix, const int &Nclass) {
+    float *FN = new float[Nclass];
 
-    for (int i = 0; i < Nclass; ++i)
-    {
+    for (int i = 0; i < Nclass; ++i) {
       const int N = i * Nclass;
-      FN[i] = std :: accumulate(confusion_matrix + N, confusion_matrix + N + i, 0.f) +
-              std :: accumulate(confusion_matrix + N + i + 1, confusion_matrix + N + Nclass, 0.f);
+      FN[i] = std ::accumulate(confusion_matrix + N, confusion_matrix + N + i,
+                               0.f) +
+              std ::accumulate(confusion_matrix + N + i + 1,
+                               confusion_matrix + N + Nclass, 0.f);
     }
     return FN;
   };
 
-  auto get_FP = [] (const float * confusion_matrix, const int & Nclass)
-  {
-    float * FP = new float[Nclass];
+  auto get_FP = [](const float *confusion_matrix, const int &Nclass) {
+    float *FP = new float[Nclass];
 
-    std :: fill_n(FP, Nclass, 0.f);
+    std ::fill_n(FP, Nclass, 0.f);
 
     for (int i = 0; i < Nclass; ++i)
       for (int j = 0; j < Nclass; ++j)
@@ -111,37 +128,35 @@ int main ()
     return FP;
   };
 
-  auto get_TOP = [] (const float * TP, const float * FP, const int & Nclass)
-  {
-    float * TOP = new float[Nclass];
-    std :: transform(TP, TP + Nclass, FP, TOP, [](const float & tp, const float & fp){return tp + fp;});
+  auto get_TOP = [](const float *TP, const float *FP, const int &Nclass) {
+    float *TOP = new float[Nclass];
+    std ::transform(TP, TP + Nclass, FP, TOP,
+                    [](const float &tp, const float &fp) { return tp + fp; });
     return TOP;
   };
 
-  auto get_P = [] (const float * TP, const float * FN, const int & Nclass)
-  {
-    float * P = new float[Nclass];
-    std :: transform(TP, TP + Nclass, FN, P, [](const float & tp, const float & fn){return tp + fn;});
+  auto get_P = [](const float *TP, const float *FN, const int &Nclass) {
+    float *P = new float[Nclass];
+    std ::transform(TP, TP + Nclass, FN, P,
+                    [](const float &tp, const float &fn) { return tp + fn; });
     return P;
   };
 
-  auto get_overall_MCC = [] (const float * confusion_matrix, const float * TOP, const float * P, const int & Nclass)
-  {
-    const float s = std :: accumulate(TOP, TOP + Nclass, 0.f);
+  auto get_overall_MCC = [](const float *confusion_matrix, const float *TOP,
+                            const float *P, const int &Nclass) {
+    const float s = std ::accumulate(TOP, TOP + Nclass, 0.f);
     float cov_x_y = 0.f;
     float cov_x_x = 0.f;
     float cov_y_y = 0.f;
 
-    for (int i = 0; i < Nclass; ++i)
-    {
+    for (int i = 0; i < Nclass; ++i) {
       cov_x_x += TOP[i] * (s - TOP[i]);
-      cov_y_y += P[i] *   (s - P[i]);
+      cov_y_y += P[i] * (s - P[i]);
       cov_x_y += confusion_matrix[i * Nclass + i] * s - P[i] * TOP[i];
     }
 
-    return cov_x_y / std :: sqrt(cov_y_y * cov_x_x);
+    return cov_x_y / std ::sqrt(cov_y_y * cov_x_x);
   };
-
 
   auto yt = InputVariable(y_true);
   yt.set_name(y_true);
@@ -152,7 +167,7 @@ int main ()
   auto n_labels = InputVariable(Nlabels);
   n_labels.set_name(Nlabels);
 
-  auto n_class = InputVariable < int >();
+  auto n_class = InputVariable<int>();
   n_class.set_name(Nclass);
 
   // Compute the unique classes
@@ -165,7 +180,8 @@ int main ()
   n_class.set(Nclass);
 
   // Compute the confusion matrix
-  Task confusion_matrix(get_confusion_matrix, yt, yp, n_labels, classes, n_class);
+  Task confusion_matrix(get_confusion_matrix, yt, yp, n_labels, classes,
+                        n_class);
   confusion_matrix.set_name(confusion_matrix);
 
   // Compute the True Positive
@@ -193,10 +209,10 @@ int main ()
 
   auto res = MCC();
 
-  std :: cout << "Matthews Correlation Coefficient: " << res << std :: endl;
+  std ::cout << "Matthews Correlation Coefficient: " << res << std ::endl;
 
-  std :: cout << std :: endl << "DOT graph:" << std :: endl;
-  MCC.graphviz(std :: cout, "matthews_coefficient");
+  std ::cout << std ::endl << "DOT graph:" << std ::endl;
+  MCC.graphviz(std ::cout, "matthews_coefficient");
 
   return 0;
 }
